@@ -1,0 +1,168 @@
+---
+title: "Análise de series temporais"
+subtitle: "Disciplina: Métodos Estatísticos de Previsão"
+author: "Rafael Sebastião Arocho e Márcio _"
+institute: "Universidade Federal de Minas Gerais" 
+date: last-modified
+date-format: "DD/MM/YYYY"
+lang: pt-br
+format:
+  revealjs:
+    theme: simple    
+    transition: fade 
+    slide-number: true
+    logo: dados/brasao.jpg 
+    footer: "Métodos Estatísticos de Previsão"
+    chalkboard: true 
+editor: visual
+---
+
+```{r}
+#| include: false
+#| title: importação de dados
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(dplyr, readr, 
+  gtsummary, broom, 
+  gt, ggplot2, 
+  forecast, lubridate, 
+  tsibble, fpp3, 
+  feasts, fable,
+  stringr
+)
+
+dados <- as_tibble(read.csv("dados/ma_lga_12345.csv")) |> mutate(trimestre = dmy(saledate) |> yearquarter())
+```
+
+## Visão Geral dos Dados
+
+Para esta análise, utilizamos o dataset **[House Property Sales Time Series]**.
+* **Kaggle:** 
+* **Período:** 2007 a 2019
+* **Frequência:** Trimestral ($n = 347$ observações)
+* **Variável Resposta ($Y_t$):** _MA_: Preço ($) mediano de casas e unidades habitacionais
+
+
+```{r}
+#| echo: false
+#| title: resumo dos dados
+
+gt(head(dados))
+
+tbl_summary(
+    dados,
+    include=c("MA", "type", "bedrooms"),
+    by=bedrooms,
+    missing="no"
+) |> 
+  add_n() |> 
+  add_p() |> 
+  add_overall()
+```
+
+## Visualização da Série
+
+
+```{r}
+#| title: "gráfico da série"
+#| echo: false
+#| fig-align: center
+#| fig-height: 4
+
+serie_temporal <- as_tsibble(dados |> select(-saledate), index=trimestre, key=c(type,bedrooms))
+
+serie_temporal |> index_by(trimestre) |> summarise(median_MA = median(MA)) |> autoplot(median_MA) + 
+  labs(title="Preço mediano da série agregada", y="Preço Mediano")
+
+serie_temporal |>
+  autoplot(MA) +
+  labs(title = "Preço Mediano por Tipo e Número de Quartos", y = "Preço Mediano")
+
+#separação em treino e teste
+teste <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = 6)
+treino <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = -6)
+```
+
+Em uma primeira inspeção podemos observar que as séries não parecem estacionárias  
+Vamos analisar, primeiro, individualmente o grupo de casas com 5 quartos utilizando uma diferenciação de ordem 1 e aplicando uma transformação de box-cox para regularizar a variância
+  
+```{r}
+plot_transformed_diff_series <- function(data, var_name, diff) {
+  
+  # 1. Encontrar o lambda ideal (Guerrero) para CADA grupo
+  lambdas <- data |>
+    features({{var_name}}, features = guerrero) |>
+    select(type, bedrooms, lambda_guerrero)
+  
+  # 2. Aplicar a transformação e a diferenciação
+  transformed_data <- data |>
+    # Juntar os lambdas de volta aos dados originais
+    left_join(lambdas, by = c("type", "bedrooms")) |>
+    
+    # Agrupar para que as operações ocorram por grupo
+    group_by(type, bedrooms) |>
+    
+    # Aplicar a transformação e a diferenciação
+    # O 'first()' garante que usamos o lambda único de cada grupo
+    mutate(
+      transformed_diff = difference(
+        box_cox({{var_name}}, lambda = first(lambda_guerrero)), 
+        lag = 1,
+        differences=diff
+      )
+    ) |>
+    ungroup()
+  
+  # 3. Plotar os resultados em um painel
+  p <- transformed_data |>
+    ggplot(aes(x = trimestre, y = transformed_diff)) +
+    geom_line() +
+    # Cria um gráfico separado para cada combinação
+    facet_wrap(vars(type, bedrooms), scales = "free_y") +
+    labs(
+      title = str_glue("Séries Pós-Transformação (Box-Cox + d={diff})", diff=diff),
+      y = "Valor Transformado e Diferenciado",
+      x = "Trimestre"
+    ) +
+    theme_minimal()
+  
+  return(p)
+}
+
+plot_transformed_diff_series(treino, MA, 1)
+plot_transformed_diff_series(treino, MA, 2)
+```
+
+
+```{r}
+#| title: analise casa 5 quartos
+#| echo: false
+
+
+casa_5_quartos <- treino |>
+  filter(type == "house", bedrooms == 5)
+
+#calculo do lambda ideal para a transformação de box cox
+lambda_ideal <- guerrero(casa_5_quartos |> pull(MA))
+
+#aplicação da diferenciação de ordem 1 
+#nos valores transformados por box-cox
+casa_5_quartos <- casa_5_quartos |> 
+  mutate(diff = difference(box_cox(MA, lambda=lambda_ideal), order_by=trimestre, lag=1, difference=2)) 
+
+#graficos de ACF e PACF
+casa_5_quartos |> ACF(diff) |> autoplot() + labs(title = "Autocorrelações")
+casa_5_quartos |> PACF(diff) |> autoplot() + labs(title= "Autocorrelações parciais")
+```
+
+Através da análise dos gráficos de ACF e PACF podemos presumir que o melhor modelo a ser ajustado é um ARIMA(2,1,0)(0,0,0) pois observamos dois picos nos retardos 1, 2 e 3 da ACF e um pico único no retardo 1 da PACF
+
+
+```{r}
+#| title: ajuste do primeiro modelo ARIMA
+#| echo: false
+
+modelo_arima_1 <- treino |> model(ARIMA(MA ~ 1 + pdq(2,1,0) + PDQ(0,0,0)))
+tidy(modelo_arima_1)
+```
