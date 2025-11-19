@@ -6,7 +6,18 @@ institute: "Universidade Federal de Minas Gerais"
 date: last-modified
 date-format: "DD/MM/YYYY"
 lang: pt-br
-format: pdf
+format:
+  pdf:
+    documentclass: scratcl
+    number-sections: true
+    geometry: 
+      - top=25mm
+      - bottom=25mm
+      - left=25mm
+      - right=25mm
+    fig-pos: 'H'
+warning: false
+   
 ---
 
 {{< pagebreak >}}
@@ -52,21 +63,9 @@ Para esta análise, utilizamos o dataset ***House Property Sales Time Series***.
 #| tbl-column: page
 #| layout-nrow: 2
 
-dados_parte1 <- dados |>
-  filter(bedrooms %in% c(1, 2, 3))
-
-dados_parte2 <- dados |>
-  filter(bedrooms %in% c(4, 5))
-
 # Tabela 1
-dados_parte1 |>
-  tbl_summary(include=c("MA", "type", "bedrooms"), by=bedrooms, missing="no") |>
-  add_n() |>
-  add_overall()
-
-# Tabela 2
-dados_parte2 |>
-  tbl_summary(include=c("MA", "type", "bedrooms"), by=bedrooms, missing="no") |>
+dados |>
+  tbl_summary(include=c("MA", "type", "bedrooms"), by=type, missing="no") |>
   add_n() |>
   add_overall()
 ```
@@ -88,20 +87,19 @@ dados_parte2 |>
 serie_temporal <- as_tsibble(dados |> select(-saledate), index=trimestre, key=c(type,bedrooms))
 
 serie_temporal |> index_by(trimestre) |> summarise(median_MA = median(MA)) |> autoplot(median_MA) + 
-  labs(title="Preço mediano da série agregada", y="Preço Mediano")
+  labs(title="Preço mediano da série agregada", y="Preço mediano")
 
 serie_temporal |>
   autoplot(MA) +
-  labs(title = "Preço Mediano por Tipo e Número de Quartos", y = "Preço Mediano")
+  labs(title = "Preço Mediano por tipo e número de Quartos", y = "Preço mediano")
 
 #separação em treino e teste
 teste <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = 6)
 treino <- serie_temporal |>  group_by(type, bedrooms) |> slice_head(n = -6)
 ```
 
-Observamos que será necessário separar as series em tipo de moradia e número de quartos para simplificar o ajuste. \
-Parece haver tendência de crescimento em praticamente todas as séries decompostas.\
-Vamos utilizar diferenciação de nível um e dois para ter outro olhar sobre as séries.
+Observamos que será necessário separar as series em tipo de moradia e número de quartos para simplificar o ajuste.  
+Parece haver tendência em praticamente todas as séries decompostas. Portanto, vamos utilizar diferenciação de nível um e dois para ter outro olhar sobre as séries.
 
 ```{r}
 #| echo: false
@@ -139,7 +137,8 @@ plot_transformed_diff_series <- function(data, var_name, diff) {
       y = "Valor Diferenciado",
       x = "Trimestre"
     ) +
-    theme_minimal()
+    theme_minimal() +
+    theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
   
   return(p)
 }
@@ -148,10 +147,9 @@ plot_transformed_diff_series(treino, MA, 1)
 plot_transformed_diff_series(treino, MA, 2)
 ```
 
-Observando as séries com as diferenciações aplicadas vamos seguir a análise com os preços de diferentes combinações de tipo de domicilio e número de quartos.
+Observando as séries com as diferenciações aplicadas vamos seguir a análise com os preços das casas de 5 quartos.
 
 ```{r}
-#| label: analise casa 2 quartos e apartamentos 5 quartos
 #| include: false
 
 plot_acf_pacf <- function(data, type, bedrooms, difference){
@@ -250,10 +248,16 @@ Os testes nos mostram que os residuos apresentam normalidade e o teste de box-pi
 Vamos fazer uma previsão alguns passos a frente
 
 ```{r}
-forecast(modelo_arima_6, h=6) |> 
-  autoplot(bind_rows(treino_casa_5, teste_casa_5)) + 
-  labs(title = "ARIMA(0,2,1)(0,0,1)[4]") +
-  theme_minimal()
+
+forecast(modelo_arima_6, h = 6, level = c(80, 95)) %>%
+  autoplot(bind_rows(treino_casa_5, teste_casa_5)) +
+  labs(
+    title = "Previsão ARIMA(0,2,1)(0,0,1)[4]",
+    subtitle = "Horizonte: 6 trimestres | Intervalos: 80% e 95%",
+    y = "Preço Mediano",
+    x = "Trimestre"
+  ) + theme_classic()
+
 ```
 
 #### Modelo de alisamento exponencial
