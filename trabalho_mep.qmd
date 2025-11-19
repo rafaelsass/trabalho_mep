@@ -57,9 +57,7 @@ Para esta análise, utilizamos o dataset ***House Property Sales Time Series***.
 
 ```{r}
 #| echo: false
-#| label: tbl-resumo-serie
-#| tbl-cap: resumo dos dados
-#| tbl-column: page
+
 
 
 dados |>
@@ -85,11 +83,11 @@ dados |>
 serie_temporal <- as_tsibble(dados |> select(-saledate), index=trimestre, key=c(type,bedrooms))
 
 serie_temporal |> index_by(trimestre) |> summarise(median_MA = median(MA)) |> autoplot(median_MA) + 
-  labs(title="Preço mediano da série agregada", y="Preço mediano")
+  labs(title="Preço mediano da série agregada", y="Preço mediano") + theme_minimal()
 
 serie_temporal |>
   autoplot(MA) +
-  labs(title = "Preço mediano por tipo e número de quartos", y = "Preço mediano")
+  labs(title = "Preço mediano por tipo e número de quartos", y = "Preço mediano") + theme_minimal()
 
 #separação em treino e teste
 teste <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = 6)
@@ -166,8 +164,8 @@ plot_acf_pacf <- function(data, type, bedrooms, difference){
     labs(title= "Autocorrelações parciais", 
          subtitle = str_glue("type:{type}\n bedrooms: {bedrooms}", type=type, bedrooms=bedrooms))
   
-  print(acf)
-  print(pacf)
+  acf
+  pacf
 }
 ```
 
@@ -195,7 +193,7 @@ plot_acf_pacf(data=treino, type="house", bedrooms=5, difference=2)
 ```
 
 Parecemos ter um comportamento de ondas senóides no gráfico de ACF e um comportamento irregular no PACF que pode indicar sazonalidade. Vamos ajustar de ínicio um modelo ARIMA(2, 1, 0). Após o ajuste inicial faremos a sobrefixação dos modelos para identificar o melhor modelo através da avaliação das métricas de AIC
-
+\  
 ```{r}
 #| label: ajuste e sobreajuste do modelo ARIMA
 #| echo: false
@@ -213,7 +211,7 @@ imprimir_tabela_arima <- function(modelo_fable) {
   tabela_formatada <- tabela_coef |> 
     dplyr::select(-.model) |> 
     gt() |> 
-    # tab_header(title = nome_modelo) |> 
+    tab_header(title = nome_modelo) |> 
     fmt_number(decimals = 4, columns = c("p.value", "statistic", "estimate"))
   
   tabela_formatada
@@ -248,12 +246,13 @@ imprimir_tabela_arima(modelo_arima_6)
 modelo_arima_7 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,2,1) + PDQ(0,0,1)))
 imprimir_tabela_arima(modelo_arima_7)
 ```
-
+\  
+\  
 Podemos, também, analisar os modelos com base no AIC:
-<!-- 
+
+  
 ```{r}
 #| echo: false
-#| label: tbl-comparacao-aic
 
 bind_rows(
   glance(modelo_arima_1),
@@ -270,6 +269,8 @@ bind_rows(
   tab_header(title = "Ranking de Modelos por AIC") |>
   fmt_number(decimals = 2)
 ```
+\  
+\  
 
 Ajustados os modelos daremos sequência na análise com o modelo ARIMA(0,2,1)(0,0,1)\[4\] por ter apresentado significância nos parâmetros e o menor dos valores de AIC
 
@@ -288,10 +289,10 @@ Box.test(residuals(modelo_arima_6)$.resid, lag=12) |>
   tidy() |> 
   gt() |> 
   tab_header("Teste de independência")
-``` -->
+```
 
 Os testes nos mostram que os residuos apresentam normalidade e o teste de box-pierce não rejeita a hipótese de independencia, o que é um indicador que o ajuste está adequado.
-<!-- 
+
 {{< pagebreak >}}
 
 ### Previsão
@@ -339,9 +340,9 @@ previsao = predict(AEH,
 
 # Constroi o grafico com ajuste, previsoes e intervalos de previsao
 plot(AEH, previsao, lwd=2, col="black", xlab="Ano", ylab=NA)
-``` -->
+```
 
-<!-- Observamos a mesma dificuldade de acertar a previsão devido a queda abrupta dos preços no fim do período.
+Observamos a mesma dificuldade de acertar a previsão devido a queda abrupta dos preços no fim do período.
 
 {{< pagebreak >}}
 
@@ -374,4 +375,4 @@ cat("\nErro Quadrático Médio (MSE) para os 6 passos ARIMA:\n")
 print(MSE_arima)
 ```
 
-Observamos um EQM menor no ajuste com o modelo ARIMA, então podemos concluir que se trata do melhor modelo para ajustar a série de preços medianos de casas com 5 quartos. -->
+Observamos um EQM menor no ajuste com o modelo ARIMA, então podemos concluir que se trata do melhor modelo para ajustar a série de preços medianos de casas com 5 quartos.
