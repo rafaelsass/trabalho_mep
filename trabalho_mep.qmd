@@ -29,7 +29,7 @@ pacman::p_load(dplyr, readr,
   forecast, lubridate, 
   tsibble, fpp3, 
   feasts, fable,
-  stringr
+  stringr, ggtime
 )
 
 dados <- as_tibble(read.csv("dados/ma_lga_12345.csv")) |> mutate(trimestre = dmy(saledate) |> yearquarter())
@@ -37,12 +37,17 @@ dados <- as_tibble(read.csv("dados/ma_lga_12345.csv")) |> mutate(trimestre = dmy
 
 ## Visão Geral dos Dados
 
-Para esta análise, utilizamos o dataset **[House Property Sales Time Series]**.
-* **Kaggle:** 
-* **Período:** 2007 a 2019
-* **Frequência:** Trimestral ($n = 347$ observações)
-* **Variável Resposta ($Y_t$):** _MA_: Preço ($) mediano de casas e unidades habitacionais
+Para esta análise, utilizamos o dataset **\[House Property Sales Time Series\]**.
 
+-   **Fonte dos dados:** [Kaggle.](https://www.kaggle.com/datasets/htagholdings/property-sales?select=ma_lga_12345.csv)
+
+-   **Período:** 2007 a 2019
+
+-   **Frequência:** Trimestral ($n = 347$ observações)
+
+-   **Variável Resposta (**$Y_t$):
+
+    -   *MA*: Preço (\$) mediano de casas e unidades habitacionais
 
 ```{r}
 #| echo: false
@@ -63,7 +68,6 @@ tbl_summary(
 
 ## Visualização da Série
 
-
 ```{r}
 #| title: "gráfico da série"
 #| echo: false
@@ -81,33 +85,24 @@ serie_temporal |>
 
 #separação em treino e teste
 teste <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = 6)
-treino <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = -6)
+treino <- serie_temporal |>  group_by(type, bedrooms) |> slice_head(n = -6)
 ```
 
-Em uma primeira inspeção podemos observar que as séries não parecem estacionárias  
-Vamos analisar, primeiro, individualmente o grupo de casas com 5 quartos utilizando uma diferenciação de ordem 1 e aplicando uma transformação de box-cox para regularizar a variância
-  
+Em uma primeira inspeção podemos observar que as séries não parecem estacionárias.\
+Vamos analisar os gráficos das séries diferenciadas com um e dois retardos e selecionar o que mais parecer se adequar a modelos ARIMA.
+
 ```{r}
 plot_transformed_diff_series <- function(data, var_name, diff) {
   
-  # 1. Encontrar o lambda ideal (Guerrero) para CADA grupo
-  lambdas <- data |>
-    features({{var_name}}, features = guerrero) |>
-    select(type, bedrooms, lambda_guerrero)
-  
   # 2. Aplicar a transformação e a diferenciação
   transformed_data <- data |>
-    # Juntar os lambdas de volta aos dados originais
-    left_join(lambdas, by = c("type", "bedrooms")) |>
-    
     # Agrupar para que as operações ocorram por grupo
     group_by(type, bedrooms) |>
     
-    # Aplicar a transformação e a diferenciação
-    # O 'first()' garante que usamos o lambda único de cada grupo
+    # Aplicar a diferenciação
     mutate(
       transformed_diff = difference(
-        box_cox({{var_name}}, lambda = first(lambda_guerrero)), 
+        {{var_name}}, 
         lag = 1,
         differences=diff
       )
@@ -121,8 +116,8 @@ plot_transformed_diff_series <- function(data, var_name, diff) {
     # Cria um gráfico separado para cada combinação
     facet_wrap(vars(type, bedrooms), scales = "free_y") +
     labs(
-      title = str_glue("Séries Pós-Transformação (Box-Cox + d={diff})", diff=diff),
-      y = "Valor Transformado e Diferenciado",
+      title = str_glue("Séries  d={diff}", diff=diff),
+      y = "Valor Diferenciado",
       x = "Trimestre"
     ) +
     theme_minimal()
@@ -134,35 +129,157 @@ plot_transformed_diff_series(treino, MA, 1)
 plot_transformed_diff_series(treino, MA, 2)
 ```
 
+Observando as séries com as diferenciações aplicadas vamos seguir a análise com os preços de _casas de cinco quartos_(`type = house`, `bedrooms = 2`) com diferenciação de ordem 2.  
+Vamos agora observar os gráficos de ACF e PACF para essa série.
 
 ```{r}
-#| title: analise casa 5 quartos
+#| title: analise casa 2 quartos e apartamentos 5 quartos
 #| echo: false
 
+plot_acf_pacf <- function(data, type, bedrooms, difference){
+  serie <- data |> filter(type=={{type}}, bedrooms == {{bedrooms}})
+  
+  #aplicação da diferenciação de ordem 1 
+  #nos valores transformados por box-cox
+  serie <- serie |> mutate(diff = difference(MA, order_by=trimestre,
+                                    lag=1, difference={{difference}}))
+  
+  #graficos de ACF e PACF
+  acf <- serie |> ACF(diff) |> autoplot() + 
+    labs(title = "Autocorrelações", 
+         subtitle = str_glue("type:{type}\n bedrooms: {bedrooms}", type=type, bedrooms=bedrooms))
+  pacf <- serie |> PACF(diff) |> autoplot() + 
+    labs(title= "Autocorrelações parciais", 
+         subtitle = str_glue("type:{type}\n bedrooms: {bedrooms}", type=type, bedrooms=bedrooms))
+  
+  return(c(acf, pacf))
+}
 
-casa_5_quartos <- treino |>
-  filter(type == "house", bedrooms == 5)
 
-#calculo do lambda ideal para a transformação de box cox
-lambda_ideal <- guerrero(casa_5_quartos |> pull(MA))
+an_1 <- plot_acf_pacf(data=treino, type="house", bedrooms=5, difference=1)
+an_2 <- plot_acf_pacf(data=treino, type="house", bedrooms=4, difference=1)
 
-#aplicação da diferenciação de ordem 1 
-#nos valores transformados por box-cox
-casa_5_quartos <- casa_5_quartos |> 
-  mutate(diff = difference(box_cox(MA, lambda=lambda_ideal), order_by=trimestre, lag=1, difference=2)) 
+an_1
+an_2
 
-#graficos de ACF e PACF
-casa_5_quartos |> ACF(diff) |> autoplot() + labs(title = "Autocorrelações")
-casa_5_quartos |> PACF(diff) |> autoplot() + labs(title= "Autocorrelações parciais")
+
 ```
 
-Através da análise dos gráficos de ACF e PACF podemos presumir que o melhor modelo a ser ajustado é um ARIMA(2,1,0)(0,0,0) pois observamos dois picos nos retardos 1, 2 e 3 da ACF e um pico único no retardo 1 da PACF
+Parecemos ter um comportamento de ondas senóides no gráfico de ACF e dois picos no PACF (lag 1 e 2). Vamos ajustar de ínicio um modelo ARIMA(2, 1, 0).  
+Após o ajuste inicial faremos a sobrefixação dos modelos para identificar o melhor modelo através da avaliação das métricas de AIC
 
 
 ```{r}
 #| title: ajuste do primeiro modelo ARIMA
 #| echo: false
 
-modelo_arima_1 <- treino |> model(ARIMA(MA ~ 1 + pdq(2,1,0) + PDQ(0,0,0)))
+treino_casa_5 <- treino |> filter(type=="house", bedrooms == 5)
+teste_casa_5 <- teste |> filter(type=="house", bedrooms == 5)
+
+
+modelo_arima_1 <- treino_casa_5 |> 
+  model(ARIMA(MA ~ pdq(2,1,0) + PDQ(0,0,0)))
 tidy(modelo_arima_1)
+aic_modelo_base <- modelo_arima_1 |> glance() |> pull(AIC)
+
+
+modelo_arima_2 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,1,0) + PDQ(0,0,0)))
+tidy(modelo_arima_2)
+aic_modelo_2 <- modelo_arima_2 |> glance() |> pull(AIC)
+
+
+modelo_arima_3 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,1,1) + PDQ(0,0,0)))
+tidy(modelo_arima_3)
+aic_modelo_3 <- modelo_arima_3 |> glance() |> pull(AIC)
+
+modelo_arima_4 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,2,0) + PDQ(0,0,0)))
+tidy(modelo_arima_4)
+aic_modelo_4 <- modelo_arima_4 |> glance() |> pull(AIC)
+
+modelo_arima_5 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(2,2,0) + PDQ(0,0,0)))
+tidy(modelo_arima_5)
+aic_modelo_5 <- modelo_arima_5 |> glance() |> pull(AIC)
 ```
+
+Ajustados os modelos daremos sequência na análise com o modelo ARIMA(1,2,0) por ter apresentado significância nos parâmetros e o menor dos valores de AIC
+
+```{r}
+ggtime::gg_tsresiduals(modelo_arima_4)
+residuals(modelo_arima_4) |> 
+  ggplot(mapping=aes(x=trimestre, y=.resid)) + 
+  geom_jitter() +
+  theme_minimal()
+
+shapiro.test(residuals(modelo_arima_4)$.resid)
+Box.test(residuals(modelo_arima_4)$.resid, lag=12)
+```
+
+Vamos utilizar uma transformação de box-cox na variável resposta para tentar estabilizar a variância e tornar os resíduos normais
+
+```{r}
+modelo_arima_4_transformado <- treino_casa_5 |> model(ARIMA(box_cox(MA, lambda=0) ~ pdq(1,2,0) + PDQ(0,0,0)))
+
+ggtime::gg_tsresiduals(modelo_arima_4_transformado)
+residuals(modelo_arima_4_transformado) |> 
+  ggplot(mapping=aes(x=trimestre, y=.resid)) + 
+  geom_jitter() +
+  theme_minimal()
+
+shapiro.test(residuals(modelo_arima_4_transformado)$.resid)
+Box.test(residuals(modelo_arima_4_transformado)$.resid, lag=12)
+```
+
+Vamos fazer uma previsão alguns passos a frente
+
+```{r}
+forecast(modelo_arima_4_transformado) |> 
+  autoplot(bind_rows(treino_casa_5, teste_casa_5)) + 
+  labs(title = "Previsão ARIMA(1,2,0)") +
+  theme_minimal()
+
+```
+
+## Modelo de alisamento exponencial
+
+Seguindo a mesma lógica dos ajustes anteriores faremos o ajuste de modelo de alisamento exponencial.
+Por não termos identificado sazonalidade utilizaremos alisamento exponencial de Holt por haver tendência na serie
+
+```{r}
+
+ma <-  ts(treino_casa_5$MA, start = c(2007, 3), frequency = 4)
+
+AEH <- HoltWinters(box_cox(ma,0), alpha = NULL, beta = NULL, gamma = FALSE)
+
+plot(AEH, lwd=2, col="black", xlab="Ano", ylab=NA) # Constroi o grafico com o ajuste
+
+# Calculo das previsoes 12 passos a frente e os intervalos de previsao
+previsao = predict(AEH, 
+                   n.ahead=6, 
+                   prediction.interval = TRUE, 
+                   level = 0.90, 
+                   interval="prediction") 
+previsao
+
+# Constroi o grafico com ajuste, previsoes e intervalos de previsao
+plot(AEH, previsao, lwd=2, col="black", xlab="Ano", ylab=NA)
+
+```
+
+
+
+
+
+```{r}
+teste_casa_5$MA 
+```
+```{r}
+modelo_alisamento <- treino_casa_5 |> 
+  model(ETS(box_cox(MA, 0) ~ season(method="N") + trend(method=c("A","M")) ))
+
+modelo_alisamento |> glance()
+
+modelo_alisamento |> forecast()
+
+modelo_alisamento |> components()
+```
+
