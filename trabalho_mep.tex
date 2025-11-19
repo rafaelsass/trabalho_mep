@@ -1,25 +1,32 @@
 % Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
-]{scratcl}
-
+  brazilian,
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod,
+  oneside]{scrartcl}
+\usepackage{xcolor}
+\usepackage[top=25mm,bottom=25mm,left=25mm,right=25mm]{geometry}
 \usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else  
-    % xetex/luatex font selection
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -37,10 +44,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\usepackage[top=25mm,bottom=25mm,left=25mm,right=25mm]{geometry}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -65,49 +68,8 @@
 \fi
 \makeatother
 
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{241,243,245}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
-\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -133,13 +95,45 @@
 \def\fps@figure{htbp}
 \makeatother
 
+
+
+\ifLuaTeX
+\usepackage[bidi=basic]{babel}
+\else
+\usepackage[bidi=default]{babel}
+\fi
+% get rid of language-specific shorthands (see #6817):
+\let\LanguageShortHands\languageshorthands
+\def\languageshorthands#1{}
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
 \usepackage{booktabs}
-\usepackage{caption}
 \usepackage{longtable}
-\usepackage{colortbl}
 \usepackage{array}
-\usepackage{anyfontsize}
 \usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{anyfontsize}
+\KOMAoption{captions}{tableheading}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -185,22 +179,11 @@
 \@ifpackageloaded{sidenotes}{}{\usepackage{sidenotes}}
 \@ifpackageloaded{marginnote}{}{\usepackage{marginnote}}
 \makeatother
-
-\ifLuaTeX
-\usepackage[bidi=basic]{babel}
-\else
-\usepackage[bidi=default]{babel}
-\fi
-\babelprovide[main,import]{brazilian}
-% get rid of language-specific shorthands (see #6817):
-\let\LanguageShortHands\languageshorthands
-\def\languageshorthands#1{}
 \usepackage{bookmark}
-
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
-  pdftitle={Análise de series temporais},
+  pdftitle={Análise de séries temporais},
   pdfauthor={Rafael Sebastião Arocho e Márcio Antonio Vieira},
   pdflang={pt-br},
   colorlinks=true,
@@ -211,7 +194,7 @@
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{Análise de series temporais}
+\title{Análise de séries temporais}
 \usepackage{etoolbox}
 \makeatletter
 \providecommand{\subtitle}[1]{% add subtitle to \maketitle
@@ -221,14 +204,13 @@
 \subtitle{Disciplina: Métodos Estatísticos de Previsão}
 \author{Rafael Sebastião Arocho e Márcio Antonio Vieira}
 \date{19/11/2025}
-
 \begin{document}
 \maketitle
 
 
 \newpage{}
 
-\subsection{Visão Geral dos Dados}\label{visuxe3o-geral-dos-dados}
+\section{Visão Geral dos Dados}\label{visuxe3o-geral-dos-dados}
 
 Para esta análise, utilizamos o dataset \textbf{\emph{House Property
 Sales Time Series}}.
@@ -253,51 +235,35 @@ Sales Time Series}}.
 
 \begin{table}
 
-\caption{\label{tbl-resumo-serie}{[}``resumo dos dados tbl1'',``resumo
-dos dados tbl2''{]}}
+\caption{\label{tbl-resumo-serie}resumo dos dados}
 
-\begin{minipage}{\linewidth}
+\centering{
 
-\fontsize{12.0pt}{14.0pt}\selectfont
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lccccc}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Characteristic} & \textbf{N} & \textbf{Overall}  N = 247\textsuperscript{\textit{1}} & \textbf{1}  N = 48\textsuperscript{\textit{1}} & \textbf{2}  N = 99\textsuperscript{\textit{1}} & \textbf{3}  N = 100\textsuperscript{\textit{1}} \\ 
-\midrule\addlinespace[2.5pt]
-MA & 247 & 456,822 (412,509, 518,911) & 332,876 (326,076, 338,709) & 432,801 (425,751, 469,920) & 540,086 (507,052, 601,104) \\ 
-type & 247 &  &  &  &  \\ 
-    house &  & 100 (40\%) & 0 (0\%) & 49 (49\%) & 51 (51\%) \\ 
-    unit &  & 147 (60\%) & 48 (100\%) & 50 (51\%) & 49 (49\%) \\ 
+\textbf{Characteristic} & \textbf{N} & \makecell[c]{\textbf{Overall}\ \ \\N = 347} & \makecell[c]{\textbf{house}\ \ \\N = 200} & \makecell[c]{\textbf{unit}\ \ \\N = 147}\\
+\midrule
+MA & 347 & 507,744 (427,623, 628,423) & 584,932 (484,806, 771,248) & 425,922 (339,125, 535,063)\\
+bedrooms & 347 &  &  & \\
+\hspace{1em}1 &  & 48 (14\%) & 0 (0\%) & 48 (33\%)\\
+\hspace{1em}2 &  & 99 (29\%) & 49 (25\%) & 50 (34\%)\\
+\hspace{1em}3 &  & 100 (29\%) & 51 (26\%) & 49 (33\%)\\
+\addlinespace
+\hspace{1em}4 &  & 51 (15\%) & 51 (26\%) & 0 (0\%)\\
+\hspace{1em}5 &  & 49 (14\%) & 49 (25\%) & 0 (0\%)\\
 \bottomrule
-\end{tabular*}
-\begin{minipage}{\linewidth}
-\textsuperscript{\textit{1}}Median (Q1, Q3); n (\%)\\
-\end{minipage}
+\multicolumn{5}{l}{\rule{0pt}{1em}\textsuperscript{1} Median (Q1, Q3); n (\%)}\\
+\end{tabular}}
 
-\end{minipage}%
-\newline
-\begin{minipage}{\linewidth}
-
-\fontsize{12.0pt}{14.0pt}\selectfont
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccc}
-\toprule
-\textbf{Characteristic} & \textbf{N} & \textbf{Overall}  N = 100\textsuperscript{\textit{1}} & \textbf{4}  N = 51\textsuperscript{\textit{1}} & \textbf{5}  N = 49\textsuperscript{\textit{1}} \\ 
-\midrule\addlinespace[2.5pt]
-MA & 100 & 771,248 (636,635, 824,491) & 636,687 (599,614, 745,430) & 807,826 (775,199, 952,327) \\ 
-type & 100 &  &  &  \\ 
-    house &  & 100 (100\%) & 51 (100\%) & 49 (100\%) \\ 
-\bottomrule
-\end{tabular*}
-\begin{minipage}{\linewidth}
-\textsuperscript{\textit{1}}Median (Q1, Q3); n (\%)\\
-\end{minipage}
-
-\end{minipage}%
+}
 
 \end{table}%
 
 \newpage{}
 
-\subsection{Visualização da Série}\label{visualizauxe7uxe3o-da-suxe9rie}
+\section{Visualização da Série}\label{visualizauxe7uxe3o-da-suxe9rie}
 
 \begin{figure}
 
@@ -305,7 +271,7 @@ type & 100 &  &  &  \\
 
 \begin{figure}[H]
 
-{\centering \pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/gráfico da série-1.pdf}}
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/series-chart-1.pdf}}
 
 }
 
@@ -319,7 +285,7 @@ type & 100 &  &  &  \\
 
 \begin{figure}[H]
 
-{\centering \pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/gráfico da série-2.pdf}}
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/series-chart-2.pdf}}
 
 }
 
@@ -330,16 +296,15 @@ type & 100 &  &  &  \\
 \end{minipage}%
 \newline
 \begin{minipage}{0.50\linewidth}
-distribuições das series\end{minipage}%
+Distribuições dos dados\end{minipage}%
 
 \end{figure}%
 
 Observamos que será necessário separar as series em tipo de moradia e
 número de quartos para simplificar o ajuste.\\
-Parece haver tendência de crescimento em praticamente todas as séries
-decompostas.\\
-Vamos utilizar diferenciação de nível um e dois para ter outro olhar
-sobre as séries.
+Parece haver tendência em praticamente todas as séries decompostas.
+Portanto, vamos utilizar diferenciação de nível um e dois para ter outro
+olhar sobre as séries.
 
 \begin{figure*}[H]
 
@@ -372,26 +337,16 @@ sobre as séries.
 comportamentos diferenciados
 
 Observando as séries com as diferenciações aplicadas vamos seguir a
-análise com os preços de diferentes combinações de tipo de domicilio e
-número de quartos.
+análise com os preços das casas de 5 quartos.
 
-\newpage{} \#\# Ajuste de modelos
+\newpage{}
 
-\subsubsection{type=house x bedrooms=5}\label{typehouse-x-bedrooms5}
+\section{Ajuste de modelos}\label{ajuste-de-modelos}
 
-Para a série de type: \emph{house} e 5 quartos testamos diferenciação
-para tornar a serie estacionária.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{an\_1 }\OtherTok{\textless{}{-}} \FunctionTok{plot\_acf\_pacf}\NormalTok{(}\AttributeTok{data=}\NormalTok{treino, }\AttributeTok{type=}\StringTok{"house"}\NormalTok{, }\AttributeTok{bedrooms=}\DecValTok{5}\NormalTok{, }\AttributeTok{difference=}\DecValTok{1}\NormalTok{)}
-\NormalTok{an\_1}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[[1]]
-\end{verbatim}
+Vamos observar o ACF e o PACF para os dados filtrados com o critério
+anterior (casas de 5 quartos).\\
+Verificaremos tanto para a série não diferenciada quanto diferenciada
+para um e dois retardos.
 
 \begin{figure}[H]
 
@@ -399,14 +354,9 @@ para tornar a serie estacionária.
 
 }
 
-\caption{ACF}
+\caption{serie original}
 
 \end{figure}%
-
-\begin{verbatim}
-
-[[2]]
-\end{verbatim}
 
 \begin{figure}[H]
 
@@ -414,20 +364,9 @@ para tornar a serie estacionária.
 
 }
 
-\caption{PACF}
+\caption{acf primeira diferenciação}
 
 \end{figure}%
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{an\_2 }\OtherTok{\textless{}{-}} \FunctionTok{plot\_acf\_pacf}\NormalTok{(}\AttributeTok{data=}\NormalTok{treino, }\AttributeTok{type=}\StringTok{"house"}\NormalTok{, }\AttributeTok{bedrooms=}\DecValTok{5}\NormalTok{, }\AttributeTok{difference=}\DecValTok{2}\NormalTok{)}
-\NormalTok{an\_2}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[[1]]
-\end{verbatim}
 
 \begin{figure}[H]
 
@@ -435,14 +374,9 @@ para tornar a serie estacionária.
 
 }
 
-\caption{ACF}
+\caption{pacf primeira diferenciação}
 
 \end{figure}%
-
-\begin{verbatim}
-
-[[2]]
-\end{verbatim}
 
 \begin{figure}[H]
 
@@ -450,102 +384,166 @@ para tornar a serie estacionária.
 
 }
 
-\caption{PACF}
+\caption{acf segunda diferenciação}
+
+\end{figure}%
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/acf_pacf primeiro modelo-5.pdf}}
+
+}
+
+\caption{pacf segunda diferenciação}
 
 \end{figure}%
 
 Parecemos ter um comportamento de ondas senóides no gráfico de ACF e um
 comportamento irregular no PACF que pode indicar sazonalidade. Vamos
-ajustar de ínicio um modelo ARIMA(2, 1, 0).\\
-Após o ajuste inicial faremos a sobrefixação dos modelos para
-identificar o melhor modelo através da avaliação das métricas de AIC
+ajustar de ínicio um modelo ARIMA(2, 1, 0). Após o ajuste inicial
+faremos a sobrefixação dos modelos para identificar o melhor modelo
+através da avaliação das métricas de AIC
 
-\begin{verbatim}
-# A tibble: 3 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(2, 1~ ar1      0.356     0.148      2.40 0.0208 
-2 house        5 ARIMA(MA ~ pdq(2, 1~ ar2      0.216     0.149      1.45 0.154  
-3 house        5 ARIMA(MA ~ pdq(2, 1~ cons~ 2707.      907.         2.98 0.00472
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(2, 1, 0) + PDQ(0, 0, 0))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ar1 & 0.3561 & 0.1481837 & 2.4031 & 0.0208 \\ 
+house & 5 & ar2 & 0.2164 & 0.1489611 & 1.4527 & 0.1537 \\ 
+house & 5 & constant & 2,706.8068 & 907.0361221 & 2.9842 & 0.0047 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
 
-\begin{verbatim}
-# A tibble: 2 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(1, 1~ ar1      0.454     0.136      3.34 1.79e-3
-2 house        5 ARIMA(MA ~ pdq(1, 1~ cons~ 3544.      949.         3.74 5.59e-4
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(1, 1, 0) + PDQ(0, 0, 0))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ar1 & 0.4542 & 0.1361811 & 3.3350 & 0.0018 \\ 
+house & 5 & constant & 3,544.1817 & 948.8267730 & 3.7353 & 0.0006 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
 
-\begin{verbatim}
-# A tibble: 3 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(1, 1~ ar1      0.811     0.189      4.30 1.00e-4
-2 house        5 ARIMA(MA ~ pdq(1, 1~ ma1     -0.485     0.311     -1.56 1.26e-1
-3 house        5 ARIMA(MA ~ pdq(1, 1~ cons~ 1192.      452.         2.64 1.17e-2
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(1, 1, 1) + PDQ(0, 0, 0))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ar1 & 0.8113 & 0.1887735 & 4.2976 & 0.0001 \\ 
+house & 5 & ma1 & -0.4850 & 0.3108357 & -1.5604 & 0.1262 \\ 
+house & 5 & constant & 1,191.6759 & 452.1114131 & 2.6358 & 0.0117 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
 
-\begin{verbatim}
-# A tibble: 1 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(1, 2~ ar1     -0.425     0.138     -3.07 0.00383
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(1, 2, 0) + PDQ(0, 0, 0))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ar1 & -0.4247 & 0.1384875 & -3.0665 & 0.0038 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
 
-\begin{verbatim}
-# A tibble: 2 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(2, 2~ ar1     -0.485     0.153    -3.17  0.00289
-2 house        5 ARIMA(MA ~ pdq(2, 2~ ar2     -0.136     0.151    -0.898 0.374  
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(2, 2, 0) + PDQ(0, 0, 0))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ar1 & -0.4854 & 0.1531778 & -3.1687 & 0.0029 \\ 
+house & 5 & ar2 & -0.1359 & 0.1513569 & -0.8981 & 0.3744 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
 
-\begin{verbatim}
-# A tibble: 2 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(0, 2~ ma1     -0.450     0.155     -2.91 0.00584
-2 house        5 ARIMA(MA ~ pdq(0, 2~ sma1    -0.756     0.217     -3.49 0.00118
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(0, 2, 1) + PDQ(0, 0, 1))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ma1 & -0.4497 & 0.1546287 & -2.9082 & 0.0058 \\ 
+house & 5 & sma1 & -0.7563 & 0.2168235 & -3.4881 & 0.0012 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
 
-\begin{verbatim}
-# A tibble: 3 x 8
-  type  bedrooms .model               term  estimate std.error statistic p.value
-  <chr>    <int> <chr>                <chr>    <dbl>     <dbl>     <dbl>   <dbl>
-1 house        5 ARIMA(MA ~ pdq(1, 2~ ar1    1.36e-4     0.295  0.000462 1.000  
-2 house        5 ARIMA(MA ~ pdq(1, 2~ ma1   -4.50e-1     0.278 -1.62     0.113  
-3 house        5 ARIMA(MA ~ pdq(1, 2~ sma1  -7.57e-1     0.222 -3.41     0.00148
-\end{verbatim}
+\begin{table}
+\caption*{
+{\fontsize{20}{25}\selectfont  ARIMA(MA \textasciitilde{} pdq(1, 2, 1) + PDQ(0, 0, 1))\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlrrrr}
+\toprule
+type & bedrooms & term & estimate & std.error & statistic & p.value \\ 
+\midrule\addlinespace[2.5pt]
+house & 5 & ar1 & 0.0001 & 0.2951405 & 0.0005 & 0.9996 \\ 
+house & 5 & ma1 & -0.4497 & 0.2777205 & -1.6194 & 0.1130 \\ 
+house & 5 & sma1 & -0.7567 & 0.2219684 & -3.4088 & 0.0015 \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+Podemos, também, analisar os modelos com base no AIC:
+
+\begin{table}
+
+\caption{\label{tbl-comparacao-aic}}
+
+\centering{
+
+\caption*{
+{\fontsize{20}{25}\selectfont  Ranking de Modelos por AIC\fontsize{12}{15}\selectfont }
+} 
+\fontsize{12.0pt}{14.0pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lr}
+\toprule
+.model & AIC \\ 
+\midrule\addlinespace[2.5pt]
+ARIMA(MA \textasciitilde{} pdq(0, 2, 1) + PDQ(0, 0, 1)) & 832.92 \\ 
+ARIMA(MA \textasciitilde{} pdq(1, 2, 1) + PDQ(0, 0, 1)) & 834.92 \\ 
+ARIMA(MA \textasciitilde{} pdq(1, 2, 0) + PDQ(0, 0, 0)) & 842.28 \\ 
+ARIMA(MA \textasciitilde{} pdq(2, 2, 0) + PDQ(0, 0, 0)) & 843.48 \\ 
+ARIMA(MA \textasciitilde{} pdq(2, 1, 0) + PDQ(0, 0, 0)) & 859.72 \\ 
+ARIMA(MA \textasciitilde{} pdq(1, 1, 1) + PDQ(0, 0, 0)) & 859.73 \\ 
+ARIMA(MA \textasciitilde{} pdq(1, 1, 0) + PDQ(0, 0, 0)) & 859.77 \\ 
+\bottomrule
+\end{tabular*}
+
+}
+
+\end{table}%
 
 Ajustados os modelos daremos sequência na análise com o modelo
 ARIMA(0,2,1)(0,0,1){[}4{]} por ter apresentado significância nos
 parâmetros e o menor dos valores de AIC
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{ggtime}\SpecialCharTok{::}\FunctionTok{gg\_tsresiduals}\NormalTok{(modelo\_arima\_6)}
-\end{Highlighting}
-\end{Shaded}
-
-\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/unnamed-chunk-4-1.pdf}}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{residuals}\NormalTok{(modelo\_arima\_6) }\SpecialCharTok{|\textgreater{}} 
-  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping=}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{trimestre, }\AttributeTok{y=}\NormalTok{.resid)) }\SpecialCharTok{+} 
-  \FunctionTok{geom\_jitter}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/unnamed-chunk-4-2.pdf}}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{shapiro.test}\NormalTok{(}\FunctionTok{residuals}\NormalTok{(modelo\_arima\_6)}\SpecialCharTok{$}\NormalTok{.resid)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{verbatim}
 
@@ -555,12 +553,6 @@ data:  residuals(modelo_arima_6)$.resid
 W = 0.96361, p-value = 0.1877
 \end{verbatim}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{Box.test}\NormalTok{(}\FunctionTok{residuals}\NormalTok{(modelo\_arima\_6)}\SpecialCharTok{$}\NormalTok{.resid, }\AttributeTok{lag=}\DecValTok{12}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{verbatim}
 
     Box-Pierce test
@@ -569,192 +561,73 @@ data:  residuals(modelo_arima_6)$.resid
 X-squared = 9.3267, df = 12, p-value = 0.6748
 \end{verbatim}
 
+\begin{table}
+
+\caption{\label{tbl-analise-residuos}{[}``teste de normalidade de
+shapiro'',``teste de box-pierce para independencia''{]}}
+
+\centering{
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/tbl-analise-residuos-1.pdf}}
+\caption{distribuição dos residuos}
+\end{figure}
+
+}
+
+\end{table}%
+
 Os testes nos mostram que os residuos apresentam normalidade e o teste
 de box-pierce não rejeita a hipótese de independencia, o que é um
 indicador que o ajuste está adequado.
 
-Vamos fazer uma previsão alguns passos a frente
+\newpage{}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{forecast}\NormalTok{(modelo\_arima\_6, }\AttributeTok{h =} \DecValTok{6}\NormalTok{, }\AttributeTok{level =} \FunctionTok{c}\NormalTok{(}\DecValTok{80}\NormalTok{, }\DecValTok{95}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{autoplot}\NormalTok{(}\FunctionTok{bind\_rows}\NormalTok{(treino\_casa\_5, teste\_casa\_5)) }\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}
-    \AttributeTok{title =} \StringTok{"Previsão ARIMA(0,2,1)(0,0,1)[4]"}\NormalTok{,}
-    \AttributeTok{subtitle =} \StringTok{"Horizonte: 6 trimestres | Intervalos: 80\% e 95\%"}\NormalTok{,}
-    \AttributeTok{y =} \StringTok{"Preço Mediano"}\NormalTok{,}
-    \AttributeTok{x =} \StringTok{"Trimestre"}
-\NormalTok{  ) }\SpecialCharTok{+} \FunctionTok{theme\_classic}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
+\subsection{Previsão}\label{previsuxe3o}
 
-\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/unnamed-chunk-5-1.pdf}}
+Vamos utilizar o modelo escolhido para fazer uma previsão 6 passos a
+frente
 
-\paragraph{Modelo de alisamento
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/fig-previsao-1.pdf}}
+
+}
+
+\caption{\label{fig-previsao}previsão 6 passos a frente}
+
+\end{figure}%
+
+Observamos que a previsão manteve a tendência que é apresentada durante
+o tempo de treinamento mas acaba errando os valores reais pois no fim da
+série existe uma mudança brusca de comportamento que não foi ajustada no
+modelo.
+
+\newpage{}
+
+\subsection{Modelo de alisamento
 exponencial}\label{modelo-de-alisamento-exponencial}
 
 Seguindo a mesma lógica dos ajustes anteriores faremos o ajuste de
 modelo de alisamento exponencial. Por não termos identificado
 sazonalidade utilizaremos alisamento exponencial de Holt-Winters aditivo
-por haver tendência e sazonalidade na série
+por haver tendência e sazonalidade constante na série.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{ma }\OtherTok{\textless{}{-}}  \FunctionTok{ts}\NormalTok{(treino\_casa\_5}\SpecialCharTok{$}\NormalTok{MA, }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2007}\NormalTok{, }\DecValTok{3}\NormalTok{), }\AttributeTok{frequency =} \DecValTok{4}\NormalTok{)}
+\begin{figure}[H]
 
-\NormalTok{AEH }\OtherTok{\textless{}{-}} \FunctionTok{HoltWinters}\NormalTok{(ma, }\AttributeTok{alpha =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{beta =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{gamma =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{seasonal =} \StringTok{"additive"}\NormalTok{)}
-\CommentTok{\# Calculo das previsoes 6 passos a frente e os intervalos de previsao}
-\NormalTok{previsao }\OtherTok{=} \FunctionTok{predict}\NormalTok{(AEH, }
-                   \AttributeTok{n.ahead=}\DecValTok{6}\NormalTok{, }
-                   \AttributeTok{prediction.interval =} \ConstantTok{TRUE}\NormalTok{, }
-                   \AttributeTok{level =} \FloatTok{0.95}\NormalTok{, }
-                   \AttributeTok{interval=}\StringTok{"prediction"}\NormalTok{) }
-\NormalTok{previsao}
-\end{Highlighting}
-\end{Shaded}
+\centering{
 
-\begin{verbatim}
-            fit     upr     lwr
-2018 Q2 1025381 1044152 1006609
-2018 Q3 1035293 1061462 1009125
-2018 Q4 1046315 1079847 1012783
-2019 Q1 1056702 1097765 1015638
-2019 Q2 1066553 1117241 1015866
-2019 Q3 1076466 1134950 1017982
-\end{verbatim}
+\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/fig-holt_winters-1.pdf}}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Constroi o grafico com ajuste, previsoes e intervalos de previsao}
-\FunctionTok{plot}\NormalTok{(AEH, previsao, }\AttributeTok{lwd=}\DecValTok{2}\NormalTok{, }\AttributeTok{col=}\StringTok{"black"}\NormalTok{, }\AttributeTok{xlab=}\StringTok{"Ano"}\NormalTok{, }\AttributeTok{ylab=}\ConstantTok{NA}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+}
 
-\pandocbounded{\includegraphics[keepaspectratio]{trabalho_mep_files/figure-pdf/unnamed-chunk-6-1.pdf}}
+\caption{\label{fig-holt_winters}Previsão ajuste de Holt-Winters
+aditivo}
 
-Faremos agora a comparação dos dois modelos utilizando erro quadrático
-médio
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# As previsões pontuais são a primeira coluna da matriz de previsão:}
-\NormalTok{previsoes\_pontuais\_hw }\OtherTok{\textless{}{-}}\NormalTok{ previsao[,}\StringTok{"fit"}\NormalTok{]}
-\NormalTok{previsoes\_pontuais\_arima }\OtherTok{\textless{}{-}} \FunctionTok{forecast}\NormalTok{(modelo\_arima\_6, }\AttributeTok{h=}\DecValTok{6}\NormalTok{)}\SpecialCharTok{$}\NormalTok{.mean}
-\NormalTok{valores\_reais }\OtherTok{\textless{}{-}}\NormalTok{ teste\_casa\_5}\SpecialCharTok{$}\NormalTok{MA}
-
-\CommentTok{\# Cálculo do Erro Quadrático Médio (MSE)}
-\NormalTok{erros\_hw }\OtherTok{\textless{}{-}}\NormalTok{ previsoes\_pontuais\_hw }\SpecialCharTok{{-}}\NormalTok{ valores\_reais}
-\NormalTok{erros\_arima }\OtherTok{\textless{}{-}}\NormalTok{ previsoes\_pontuais\_arima }\SpecialCharTok{{-}}\NormalTok{ valores\_reais}
-\NormalTok{MSE\_hw }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(erros\_hw}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
-\NormalTok{MSE\_arima }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(erros\_arima}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
-\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{Previsões Pontuais HW:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Previsões Pontuais HW:
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{print}\NormalTok{(previsoes\_pontuais\_hw)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-        Qtr1    Qtr2    Qtr3    Qtr4
-2018         1025381 1035293 1046315
-2019 1056702 1066553 1076466        
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{Previsões Pontuais ARIMA:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Previsões Pontuais ARIMA:
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{print}\NormalTok{(previsoes\_pontuais\_arima)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] 1022220 1026582 1033842 1044259 1052874 1061490
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{Valores Reais (Base de Teste):}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Valores Reais (Base de Teste):
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{print}\NormalTok{(valores\_reais)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] 1017752 1007114 1002323  998136  995363  970268
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{Erro Quadrático Médio (MSE) para os 6 passos HW:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Erro Quadrático Médio (MSE) para os 6 passos HW:
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{print}\NormalTok{(MSE\_hw)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] 3760607450
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{Erro Quadrático Médio (MSE) para os 6 passos ARIMA:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Erro Quadrático Médio (MSE) para os 6 passos ARIMA:
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{print}\NormalTok{(MSE\_arima)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] 2524795264
-\end{verbatim}
-
-Observamos um EQM menor no ajuste com o modelo ARIMA, então podemos
-concluir que se trata do melhor modelo para ajustar a série de preços
-medianos de casas com 5 quartos.
+\end{figure}%
 
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Análise de series temporais"
+title: "Análise de séries temporais"
 subtitle: "Disciplina: Métodos Estatísticos de Previsão"
 author: "Rafael Sebastião Arocho e Márcio Antonio Vieira"
 institute: "Universidade Federal de Minas Gerais" 
@@ -8,7 +8,7 @@ date-format: "DD/MM/YYYY"
 lang: pt-br
 format:
   pdf:
-    documentclass: scratcl
+    # documentclass: scratcl
     number-sections: true
     geometry: 
       - top=25mm
@@ -17,7 +17,7 @@ format:
       - right=25mm
     fig-pos: 'H'
 warning: false
-   
+echo: false
 ---
 
 {{< pagebreak >}}
@@ -34,7 +34,7 @@ pacman::p_load(dplyr, readr,
   forecast, lubridate, 
   tsibble, fpp3, 
   feasts, fable,
-  stringr, ggtime
+  stringr, ggtime, knitr, kableExtra, broom
 )
 
 dados <- as_tibble(read.csv("dados/ma_lga_12345.csv")) |> mutate(trimestre = dmy(saledate) |> yearquarter())
@@ -54,20 +54,18 @@ Para esta análise, utilizamos o dataset ***House Property Sales Time Series***.
 
     -   *MA*: Preço (\$) mediano de casas e unidades habitacionais
 
+
 ```{r}
 #| echo: false
 #| label: tbl-resumo-serie
-#| tbl-cap: 
-#|  - resumo dos dados tbl1
-#|  - resumo dos dados tbl2
+#| tbl-cap: resumo dos dados
 #| tbl-column: page
-#| layout-nrow: 2
 
-# Tabela 1
+
 dados |>
   tbl_summary(include=c("MA", "type", "bedrooms"), by=type, missing="no") |>
   add_n() |>
-  add_overall()
+  add_overall() |> as_kable_extra(booktabs=TRUE) |> kable_styling(latex_options="scale_down")
 ```
 
 {{< pagebreak >}}
@@ -75,9 +73,9 @@ dados |>
 ## Visualização da Série
 
 ```{r}
-#| label: "gráfico da série"
+#| label: series-chart
 #| echo: false
-#| fig-cap: "distribuições das series"
+#| fig-cap: "Distribuições dos dados"
 #| fig-subcap:
 #|   - "serie completa"
 #|   - "serie decomposta"
@@ -91,7 +89,7 @@ serie_temporal |> index_by(trimestre) |> summarise(median_MA = median(MA)) |> au
 
 serie_temporal |>
   autoplot(MA) +
-  labs(title = "Preço Mediano por tipo e número de Quartos", y = "Preço mediano")
+  labs(title = "Preço mediano por tipo e número de quartos", y = "Preço mediano")
 
 #separação em treino e teste
 teste <- serie_temporal |> group_by(type, bedrooms) |> slice_tail(n = 6)
@@ -133,7 +131,7 @@ plot_transformed_diff_series <- function(data, var_name, diff) {
     # Cria um gráfico separado para cada combinação
     facet_wrap(vars(type, bedrooms), scales = "free_y") +
     labs(
-      title = str_glue("Séries  d={diff}", diff=diff),
+      title = str_glue("Diferenciação d={diff}", diff=diff),
       y = "Valor Diferenciado",
       x = "Trimestre"
     ) +
@@ -149,7 +147,7 @@ plot_transformed_diff_series(treino, MA, 2)
 
 Observando as séries com as diferenciações aplicadas vamos seguir a análise com os preços das casas de 5 quartos.
 
-```{r}
+```{r func}
 #| include: false
 
 plot_acf_pacf <- function(data, type, bedrooms, difference){
@@ -168,103 +166,166 @@ plot_acf_pacf <- function(data, type, bedrooms, difference){
     labs(title= "Autocorrelações parciais", 
          subtitle = str_glue("type:{type}\n bedrooms: {bedrooms}", type=type, bedrooms=bedrooms))
   
-  return(c(acf, pacf))
+  print(acf)
+  print(pacf)
 }
 ```
 
-{{< pagebreak >}} \## Ajuste de modelos
+{{< pagebreak >}}
 
-### type=house x bedrooms=5
+## Ajuste de modelos
 
-Para a série de type: *house* e 5 quartos testamos diferenciação para tornar a serie estacionária.
+Vamos observar o ACF e o PACF para os dados filtrados com o critério anterior (casas de 5 quartos).  
+Verificaremos tanto para a série não diferenciada quanto diferenciada para um e dois retardos.
 
 ```{r}
 #| label: "acf_pacf primeiro modelo"
-#| fig-cap:
-#|  - ACF
-#|  - PACF
-an_1 <- plot_acf_pacf(data=treino, type="house", bedrooms=5, difference=1)
-an_1
-an_2 <- plot_acf_pacf(data=treino, type="house", bedrooms=5, difference=2)
-an_2
+#| fig-cap: 
+#|   - "serie original"
+#|   - "acf primeira diferenciação"
+#|   - "pacf primeira diferenciação"
+#|   - "acf segunda diferenciação"
+#|   - "pacf segunda diferenciação"
+
+ggtime::gg_tsdisplay(treino |> filter(type=="house", bedrooms==5), MA, "partial")
+
+plot_acf_pacf(data=treino, type="house", bedrooms=5, difference=1)
+plot_acf_pacf(data=treino, type="house", bedrooms=5, difference=2)
+
 ```
 
-Parecemos ter um comportamento de ondas senóides no gráfico de ACF e um comportamento irregular no PACF que pode indicar sazonalidade. Vamos ajustar de ínicio um modelo ARIMA(2, 1, 0).\
-Após o ajuste inicial faremos a sobrefixação dos modelos para identificar o melhor modelo através da avaliação das métricas de AIC
+Parecemos ter um comportamento de ondas senóides no gráfico de ACF e um comportamento irregular no PACF que pode indicar sazonalidade. Vamos ajustar de ínicio um modelo ARIMA(2, 1, 0). Após o ajuste inicial faremos a sobrefixação dos modelos para identificar o melhor modelo através da avaliação das métricas de AIC
 
 ```{r}
-#| title: ajuste do primeiro modelo ARIMA
+#| label: ajuste e sobreajuste do modelo ARIMA
 #| echo: false
 
 treino_casa_5 <- treino |> filter(type=="house", bedrooms == 5)
 teste_casa_5 <- teste |> filter(type=="house", bedrooms == 5)
 
+# Função para gerar a tabela formatada
+imprimir_tabela_arima <- function(modelo_fable) {
+  
+  tabela_coef <- tidy(modelo_fable)
+  # Pega o nome do modelo (assume que há apenas 1 modelo no objeto)
+  nome_modelo <- unique(tabela_coef$.model) 
+  
+  tabela_formatada <- tabela_coef |> 
+    dplyr::select(-.model) |> 
+    gt() |> 
+    # tab_header(title = nome_modelo) |> 
+    fmt_number(decimals = 4, columns = c("p.value", "statistic", "estimate"))
+  
+  tabela_formatada
+}
 
-modelo_arima_1 <- treino_casa_5 |> 
-  model(ARIMA(MA ~ pdq(2,1,0) + PDQ(0,0,0)))
-tidy(modelo_arima_1)
-aic_modelo_base <- modelo_arima_1 |> glance() |> pull(AIC)
 
+# --- Modelo 1 ---
+modelo_arima_1 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(2,1,0) + PDQ(0,0,0)))
+imprimir_tabela_arima(modelo_arima_1)
+
+# --- Modelo 2 ---
 modelo_arima_2 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,1,0) + PDQ(0,0,0)))
-tidy(modelo_arima_2)
-aic_modelo_2 <- modelo_arima_2 |> glance() |> pull(AIC)
+imprimir_tabela_arima(modelo_arima_2)
 
+# --- Modelo 3 ---
 modelo_arima_3 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,1,1) + PDQ(0,0,0)))
-tidy(modelo_arima_3)
-aic_modelo_3 <- modelo_arima_3 |> glance() |> pull(AIC)
+imprimir_tabela_arima(modelo_arima_3)
 
+# --- Modelo 4 ---
 modelo_arima_4 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,2,0) + PDQ(0,0,0)))
-tidy(modelo_arima_4)
-aic_modelo_4 <- modelo_arima_4 |> glance() |> pull(AIC)
+imprimir_tabela_arima(modelo_arima_4)
 
+# --- Modelo 5 ---
 modelo_arima_5 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(2,2,0) + PDQ(0,0,0)))
-tidy(modelo_arima_5)
-aic_modelo_5 <- modelo_arima_5 |> glance() |> pull(AIC)
+imprimir_tabela_arima(modelo_arima_5)
 
+# --- Modelo 6 ---
 modelo_arima_6 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(0,2,1) + PDQ(0,0,1)))
-tidy(modelo_arima_6)
-aic_modelo_6 <- modelo_arima_6 |> glance() |> pull(AIC)
+imprimir_tabela_arima(modelo_arima_6)
 
+# --- Modelo 7 ---
 modelo_arima_7 <- treino_casa_5 |> model(ARIMA(MA ~ pdq(1,2,1) + PDQ(0,0,1)))
-tidy(modelo_arima_7)
-aic_modelo_7 <- modelo_arima_7 |> glance() |> pull(AIC)
+imprimir_tabela_arima(modelo_arima_7)
 ```
 
-Ajustados os modelos daremos sequência na análise com o modelo ARIMA(0,2,1)(0,0,1)[4] por ter apresentado significância nos parâmetros e o menor dos valores de AIC
+Podemos, também, analisar os modelos com base no AIC:
+<!-- 
+```{r}
+#| echo: false
+#| label: tbl-comparacao-aic
+
+bind_rows(
+  glance(modelo_arima_1),
+  glance(modelo_arima_2),
+  glance(modelo_arima_3),
+  glance(modelo_arima_4),
+  glance(modelo_arima_5),
+  glance(modelo_arima_6),
+  glance(modelo_arima_7)
+) |> 
+  select(.model, AIC) |> 
+  arrange(AIC) |> 
+  gt() |>
+  tab_header(title = "Ranking de Modelos por AIC") |>
+  fmt_number(decimals = 2)
+```
+
+Ajustados os modelos daremos sequência na análise com o modelo ARIMA(0,2,1)(0,0,1)\[4\] por ter apresentado significância nos parâmetros e o menor dos valores de AIC
 
 ```{r}
-ggtime::gg_tsresiduals(modelo_arima_6)
-residuals(modelo_arima_6) |> 
-  ggplot(mapping=aes(x=trimestre, y=.resid)) + 
-  geom_jitter() +
-  theme_minimal()
+#| echo: false
+#| label: tbl-analise-residuos
+#| fig-cap: "analise de residuos"
+#| tbl-cap:
+#|   - "teste de normalidade de shapiro"
+#|   - "teste de box-pierce para independencia"
 
-shapiro.test(residuals(modelo_arima_6)$.resid)
-Box.test(residuals(modelo_arima_6)$.resid, lag=12)
-```
+ggtime::gg_tsresiduals(modelo_arima_6)
+
+shapiro.test(residuals(modelo_arima_6)$.resid) |> tidy() |> gt() |> tab_header("Teste de normalidade") |> fmt_number(columns = c(statistic, p.value), decimals = 4)
+Box.test(residuals(modelo_arima_6)$.resid, lag=12) |> 
+  tidy() |> 
+  gt() |> 
+  tab_header("Teste de independência")
+``` -->
 
 Os testes nos mostram que os residuos apresentam normalidade e o teste de box-pierce não rejeita a hipótese de independencia, o que é um indicador que o ajuste está adequado.
+<!-- 
+{{< pagebreak >}}
 
-Vamos fazer uma previsão alguns passos a frente
+### Previsão
+
+Vamos utilizar o modelo escolhido para fazer uma previsão 6 passos a frente
 
 ```{r}
+#| label: fig-previsao
+#| echo: false
+#| fig-cap: "previsão 6 passos a frente"
 
-forecast(modelo_arima_6, h = 6, level = c(80, 95)) %>%
+forecast(modelo_arima_6, h = 6, level = 95) %>%
   autoplot(bind_rows(treino_casa_5, teste_casa_5)) +
   labs(
     title = "Previsão ARIMA(0,2,1)(0,0,1)[4]",
-    subtitle = "Horizonte: 6 trimestres | Intervalos: 80% e 95%",
+    subtitle = "Horizonte: 6 trimestres | Intervalo 95%",
     y = "Preço Mediano",
     x = "Trimestre"
-  ) + theme_classic()
+  ) + 
+    theme_classic() 
 
 ```
 
-#### Modelo de alisamento exponencial
+Observamos que a previsão manteve a tendência que é apresentada durante o tempo de treinamento mas acaba errando os valores reais pois no fim da série existe uma mudança brusca de comportamento que não foi ajustada no modelo.
 
-Seguindo a mesma lógica dos ajustes anteriores faremos o ajuste de modelo de alisamento exponencial. Por não termos identificado sazonalidade utilizaremos alisamento exponencial de Holt-Winters aditivo por haver tendência e sazonalidade na série
+{{< pagebreak >}}
+
+### Modelo de alisamento exponencial
+
+Seguindo a mesma lógica dos ajustes anteriores faremos o ajuste de modelo de alisamento exponencial. Por não termos identificado sazonalidade utilizaremos alisamento exponencial de Holt-Winters aditivo por haver tendência e sazonalidade constante na série.
 
 ```{r}
+#| label: fig-holt_winters
+#| fig-cap: "Previsão ajuste de Holt-Winters aditivo"
 
 ma <-  ts(treino_casa_5$MA, start = c(2007, 3), frequency = 4)
 
@@ -275,15 +336,21 @@ previsao = predict(AEH,
                    prediction.interval = TRUE, 
                    level = 0.95, 
                    interval="prediction") 
-previsao
 
 # Constroi o grafico com ajuste, previsoes e intervalos de previsao
 plot(AEH, previsao, lwd=2, col="black", xlab="Ano", ylab=NA)
-```
+``` -->
 
-Faremos agora a comparação dos dois modelos utilizando erro quadrático médio
+<!-- Observamos a mesma dificuldade de acertar a previsão devido a queda abrupta dos preços no fim do período.
 
-```{r}
+{{< pagebreak >}}
+
+### Comparação dos modelos
+
+Vamos comparar os dois modelos em relação ao erro quadrático médio:
+
+```{r calculo eqm}
+
 # As previsões pontuais são a primeira coluna da matriz de previsão:
 previsoes_pontuais_hw <- previsao[,"fit"]
 previsoes_pontuais_arima <- forecast(modelo_arima_6, h=6)$.mean
@@ -307,4 +374,4 @@ cat("\nErro Quadrático Médio (MSE) para os 6 passos ARIMA:\n")
 print(MSE_arima)
 ```
 
-Observamos um EQM menor no ajuste com o modelo ARIMA, então podemos concluir que se trata do melhor modelo para ajustar a série de preços medianos de casas com 5 quartos.
+Observamos um EQM menor no ajuste com o modelo ARIMA, então podemos concluir que se trata do melhor modelo para ajustar a série de preços medianos de casas com 5 quartos. -->
